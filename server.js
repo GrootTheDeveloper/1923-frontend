@@ -1,14 +1,16 @@
-const express = require("express");
-const path = require("path");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Define __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-// Azure assigns the port dynamically to process.env.PORT (usually 8080)
 const port = process.env.PORT || 8080;
 
-// Serve the static files built by Vite in the 'dist' folder
 app.use(express.static(path.join(__dirname, "dist")));
 
-// SPA fallback: any request that doesn't match a static file goes to index.html
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
