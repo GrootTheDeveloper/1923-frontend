@@ -24,6 +24,8 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
+        env:
+          VITE_API_BASE_URL: https://1923-backend-haerbqcwcwbxfmc9.southeastasia-01.azurewebsites.net/api
         run: |
           npm install
           npm run build --if-present
