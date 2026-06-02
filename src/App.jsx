@@ -1,58 +1,61 @@
 import { useEffect, useState } from "react";
 import { extractDocument, getDocument, getDocuments } from "./api/documentService";
 
-const farmSteps = [
+const workflowSteps = [
   {
-    label: "React",
-    detail: "Upload CV/JD PDF va hien thi text preview cho nguoi dung.",
+    title: "Upload source",
+    detail: "Choose a CV or JD PDF with selectable text.",
   },
   {
-    label: "FastAPI",
-    detail: "Nhan file, validate PDF va goi service trich xuat text.",
+    title: "Extract text",
+    detail: "FastAPI uses PyMuPDF to read each page.",
   },
   {
-    label: "PyMuPDF",
-    detail: "Doc text tung trang de lam du lieu dau vao cho matching sau nay.",
-  },
-  {
-    label: "MongoDB",
-    detail: "Luu metadata, pages va full text de xem lai lich su xu ly.",
+    title: "Prepare matching",
+    detail: "MongoDB stores text for the next matching module.",
   },
 ];
 
 const libraryNotes = [
   {
     name: "PyMuPDF",
-    role: "Dang dung cho MVP",
-    reason: "Nhanh, doc theo trang tot, phu hop demo doc text CV/JD.",
+    role: "MVP choice",
+    reason: "Fast, reliable page-level extraction for CV and JD PDFs.",
   },
   {
     name: "pypdf",
-    role: "Phuong an nhe",
-    reason: "De cai dat, hop PDF don gian nhung layout phuc tap yeu hon.",
+    role: "Lightweight option",
+    reason: "Simple setup, but less predictable with complex layouts.",
   },
   {
     name: "pdfplumber",
-    role: "Phuong an layout",
-    reason: "Tot khi can bang bieu hoac text can giu cau truc hon.",
+    role: "Layout option",
+    reason: "Useful when table or column structure matters.",
   },
   {
     name: "OCR",
-    role: "Huong phat trien",
-    reason: "Dung cho CV/JD dang scan anh, khi PDF khong co text that.",
+    role: "Next phase",
+    reason: "Needed for scanned PDFs that do not contain real text.",
   },
 ];
 
 function formatDate(value) {
   if (!value) return "Just now";
+
   return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
 }
 
+function formatSize(file) {
+  if (!file) return "";
+  return `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+}
+
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [documentType, setDocumentType] = useState("CV");
   const [result, setResult] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [error, setError] = useState("");
@@ -110,7 +113,7 @@ function App() {
 
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
       setSelectedFile(null);
-      setError("Hay chon file PDF de doc text CV/JD.");
+      setError("Please choose a PDF file before extracting text.");
       return;
     }
 
@@ -119,7 +122,7 @@ function App() {
 
   const handleExtract = async () => {
     if (!selectedFile) {
-      setError("Chon mot file PDF truoc khi doc text.");
+      setError("Choose a CV or JD PDF first.");
       return;
     }
 
@@ -133,20 +136,22 @@ function App() {
       await loadDocuments();
     } catch (requestError) {
       const detail = requestError.response?.data?.detail;
-      setError(detail || "Khong doc duoc file PDF. Kiem tra backend va MongoDB roi thu lai.");
+      setError(detail || "Could not extract this PDF. Check backend and MongoDB connection.");
     } finally {
       setIsExtracting(false);
     }
   };
 
   const handleOpenHistory = async (documentId) => {
+    if (!documentId) return;
+
     setError("");
     try {
       const data = await getDocument(documentId);
       setResult(data);
       setActivePage(0);
     } catch {
-      setError("Khong tai duoc document da luu.");
+      setError("Could not load the saved document.");
     }
   };
 
@@ -154,171 +159,213 @@ function App() {
 
   return (
     <main className="app-shell">
-      <section className="hero-section">
-        <nav className="top-bar">
+      <header className="product-header">
+        <a className="brand-mark" href="#top" aria-label="CV-JD Match Lab home">
+          <span>CM</span>
           <div>
-            <span className="eyebrow">FARM Stack Demo</span>
             <strong>CV-JD Match Lab</strong>
+            <small>FARM PDF extraction MVP</small>
           </div>
-          <a href="#upload" className="nav-pill">
-            Upload PDF
-          </a>
+        </a>
+
+        <nav className="header-nav" aria-label="Primary navigation">
+          <a href="#workspace">Workspace</a>
+          <a href="#history">History</a>
+          <a href="#stack">Stack</a>
         </nav>
+      </header>
 
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <span className="status-chip">MVP: PDF text extraction first</span>
-            <h1>Doc CV va JD tu PDF, san sang cho buoc matching.</h1>
-            <p>
-              Giao dien nay bám sát hướng đề tài: người dùng upload CV hoặc JD dạng PDF,
-              FastAPI trích xuất text bằng PyMuPDF, MongoDB lưu kết quả để sau này chấm độ
-              phù hợp giữa ứng viên và mô tả công việc.
-            </p>
-            <div className="hero-actions">
-              <a href="#upload" className="primary-action">
-                Thu doc PDF
-              </a>
-              <a href="#architecture" className="secondary-action">
-                Xem FARM flow
-              </a>
-            </div>
+      <section className="hero-panel" id="top">
+        <div className="hero-copy">
+          <span className="section-kicker">Production-oriented demo</span>
+          <h1>Extract CV and JD text before matching candidates to roles.</h1>
+          <p>
+            A focused FARM workflow for tomorrow's report: React handles the workspace,
+            FastAPI processes PDF uploads, PyMuPDF extracts text, and MongoDB stores
+            extraction history for the future matching engine.
+          </p>
+        </div>
+
+        <div className="hero-summary" aria-label="Product status">
+          <div>
+            <span className="summary-value">4</span>
+            <span className="summary-label">FARM modules</span>
           </div>
-
-          <div className="signal-card">
-            <div className="signal-header">
-              <span>Current pipeline</span>
-              <strong>Ready</strong>
-            </div>
-            <div className="pipeline">
-              {farmSteps.map((step) => (
-                <article key={step.label}>
-                  <span>{step.label}</span>
-                  <p>{step.detail}</p>
-                </article>
-              ))}
-            </div>
+          <div>
+            <span className="summary-value">{documents.length}</span>
+            <span className="summary-label">Saved documents</span>
+          </div>
+          <div>
+            <span className="summary-value">{result?.library_used || "PyMuPDF"}</span>
+            <span className="summary-label">Extraction library</span>
           </div>
         </div>
       </section>
 
-      <section className="workspace-grid" id="upload">
-        <div className="upload-card">
-          <span className="eyebrow">Step 01</span>
-          <h2>Upload CV/JD PDF</h2>
-          <p>
-            MVP hien tai chi tap trung vao doc text. Phan match CV voi JD se dung output nay
-            lam input o buoc tiep theo.
-          </p>
+      <section className="workflow-strip" aria-label="CV-JD extraction workflow">
+        {workflowSteps.map((step, index) => (
+          <article key={step.title}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <strong>{step.title}</strong>
+              <p>{step.detail}</p>
+            </div>
+          </article>
+        ))}
+      </section>
 
-          <label className="dropzone">
+      <section className="workspace" id="workspace">
+        <aside className="control-panel">
+          <div className="panel-heading">
+            <span className="section-kicker">Input</span>
+            <h2>Document intake</h2>
+            <p>Upload a PDF source. This MVP extracts text only; matching comes next.</p>
+          </div>
+
+          <div className="type-toggle" aria-label="Document type">
+            {["CV", "JD"].map((type) => (
+              <button
+                key={type}
+                className={documentType === type ? "active" : ""}
+                onClick={() => setDocumentType(type)}
+                type="button"
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+
+          <label className="upload-dropzone">
             <input type="file" accept="application/pdf" onChange={handleFileChange} />
-            <span className="dropzone-icon">PDF</span>
-            <strong>{selectedFile ? selectedFile.name : "Chon file PDF"}</strong>
+            <span className="file-badge">{documentType}</span>
+            <strong>{selectedFile ? selectedFile.name : `Upload ${documentType} PDF`}</strong>
             <small>
-              {selectedFile
-                ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
-                : "Ho tro CV hoac JD dang PDF co text that"}
+              {selectedFile ? formatSize(selectedFile) : "PDF with selectable text is recommended"}
             </small>
           </label>
 
-          <button className="primary-action full-width" onClick={handleExtract} disabled={isExtracting}>
-            {isExtracting ? "Dang doc text..." : "Doc text tu PDF"}
+          <button
+            className="primary-button"
+            disabled={isExtracting}
+            onClick={handleExtract}
+            type="button"
+          >
+            {isExtracting ? "Extracting text..." : "Extract PDF text"}
           </button>
 
-          {error && <div className="error-box">{error}</div>}
-        </div>
+          {error && <div className="alert alert-error">{error}</div>}
 
-        <div className="result-card">
-          <div className="section-heading">
+          <div className="readiness-card">
+            <strong>Ready for next milestone</strong>
+            <p>
+              The extracted text can become input for keyword matching, skill scoring,
+              and CV-to-JD fit explanation.
+            </p>
+          </div>
+        </aside>
+
+        <section className="viewer-panel">
+          <div className="viewer-header">
             <div>
-              <span className="eyebrow">Step 02</span>
-              <h2>Text extracted</h2>
+              <span className="section-kicker">Output</span>
+              <h2>Extraction result</h2>
             </div>
             {result && (
-              <span className="saved-chip">
-                {result.saved_to_mongodb ? "Saved to MongoDB" : "MongoDB not connected"}
+              <span className={result.saved_to_mongodb ? "status-pill success" : "status-pill warning"}>
+                {result.saved_to_mongodb ? "Stored in MongoDB" : "Preview only"}
               </span>
             )}
           </div>
 
           {result ? (
             <>
-              <div className="metric-row">
-                <div>
+              <div className="metrics-grid">
+                <article>
                   <span>{result.page_count}</span>
                   <small>Pages</small>
-                </div>
-                <div>
+                </article>
+                <article>
                   <span>{result.char_count}</span>
                   <small>Characters</small>
-                </div>
-                <div>
+                </article>
+                <article>
                   <span>{result.library_used}</span>
                   <small>Library</small>
-                </div>
+                </article>
               </div>
 
-              {result.storage_error && <div className="warning-box">{result.storage_error}</div>}
+              {result.storage_error && <div className="alert alert-warning">{result.storage_error}</div>}
 
-              <div className="page-tabs">
-                {result.pages.map((page, index) => (
-                  <button
-                    key={page.page_number}
-                    className={index === activePage ? "active" : ""}
-                    onClick={() => setActivePage(index)}
-                  >
-                    Page {page.page_number}
-                  </button>
-                ))}
+              <div className="page-toolbar">
+                <span>Page preview</span>
+                <div className="page-tabs">
+                  {result.pages.map((page, index) => (
+                    <button
+                      key={page.page_number}
+                      className={index === activePage ? "active" : ""}
+                      onClick={() => setActivePage(index)}
+                      type="button"
+                    >
+                      {page.page_number}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <pre className="text-preview">
-                {visiblePage?.text || "Trang nay khong co text. Neu la PDF scan, can them OCR."}
+                {visiblePage?.text || "No selectable text found on this page. OCR is needed for scanned PDFs."}
               </pre>
             </>
           ) : (
-            <div className="empty-state">
-              <strong>Chua co text de hien thi</strong>
-              <p>Upload mot file PDF de xem text theo tung trang.</p>
+            <div className="empty-viewer">
+              <span>PDF</span>
+              <strong>No document extracted yet</strong>
+              <p>Choose a CV or JD PDF on the left to generate the first text preview.</p>
             </div>
           )}
-        </div>
+        </section>
       </section>
 
-      <section className="info-grid" id="architecture">
-        <div className="history-card">
-          <div className="section-heading">
+      <section className="support-grid">
+        <section className="history-panel" id="history">
+          <div className="panel-heading horizontal">
             <div>
-              <span className="eyebrow">MongoDB</span>
-              <h2>Lich su file da doc</h2>
+              <span className="section-kicker">MongoDB history</span>
+              <h2>Recent extractions</h2>
             </div>
-            {isLoadingHistory && <small>Dang tai...</small>}
+            {isLoadingHistory && <small>Loading...</small>}
           </div>
 
           {documents.length > 0 ? (
             <div className="history-list">
               {documents.map((document) => (
-                <button key={document.id} onClick={() => handleOpenHistory(document.id)}>
-                  <strong>{document.filename}</strong>
-                  <span>
-                    {document.page_count} pages · {document.char_count} chars ·{" "}
-                    {formatDate(document.created_at)}
-                  </span>
-                  <small>{document.text_preview || "No preview"}</small>
+                <button key={document.id} onClick={() => handleOpenHistory(document.id)} type="button">
+                  <span className="history-icon">PDF</span>
+                  <div>
+                    <strong>{document.filename}</strong>
+                    <small>
+                      {document.page_count} pages / {document.char_count} chars /{" "}
+                      {formatDate(document.created_at)}
+                    </small>
+                    <p>{document.text_preview || "No preview available"}</p>
+                  </div>
                 </button>
               ))}
             </div>
           ) : (
-            <div className="empty-state compact">
-              <strong>Chua co lich su</strong>
-              <p>Neu MongoDB dang chay, file upload thanh cong se xuat hien tai day.</p>
+            <div className="empty-compact">
+              <strong>No saved documents yet</strong>
+              <p>When MongoDB is connected, successful uploads will appear here.</p>
             </div>
           )}
-        </div>
+        </section>
 
-        <div className="library-card">
-          <span className="eyebrow">PDF libraries</span>
-          <h2>Bo thu vien doc text</h2>
+        <section className="stack-panel" id="stack">
+          <div className="panel-heading">
+            <span className="section-kicker">PDF library decision</span>
+            <h2>Extraction stack</h2>
+          </div>
+
           <div className="library-list">
             {libraryNotes.map((library) => (
               <article key={library.name}>
@@ -330,7 +377,7 @@ function App() {
               </article>
             ))}
           </div>
-        </div>
+        </section>
       </section>
     </main>
   );
