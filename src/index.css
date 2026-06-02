@@ -92,8 +92,7 @@ a {
 .viewer-header,
 .panel-heading.horizontal,
 .page-toolbar,
-.history-list button,
-.library-list article div {
+.history-list button {
   display: flex;
 }
 
@@ -283,8 +282,7 @@ p {
 
 .control-panel,
 .viewer-panel,
-.history-panel,
-.stack-panel {
+.history-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   background: rgba(255, 253, 248, 0.86);
@@ -407,25 +405,6 @@ p {
   transform: none;
 }
 
-.readiness-card {
-  margin-top: 16px;
-  border: 1px solid rgba(49, 95, 143, 0.16);
-  border-radius: 20px;
-  background: rgba(49, 95, 143, 0.07);
-  padding: 16px;
-}
-
-.readiness-card strong {
-  color: var(--blue);
-  font-weight: 900;
-}
-
-.readiness-card p {
-  margin: 7px 0 0;
-  font-size: 0.9rem;
-  line-height: 1.55;
-}
-
 .viewer-header,
 .panel-heading.horizontal,
 .page-toolbar {
@@ -514,6 +493,7 @@ p {
   color: var(--muted);
   cursor: pointer;
   font-weight: 900;
+  padding: 0 12px;
 }
 
 .page-tabs button.active {
@@ -610,13 +590,7 @@ p {
   padding: 24px;
 }
 
-.stack-panel {
-  flex: 0 0 390px;
-  padding: 24px;
-}
-
-.history-list,
-.library-list {
+.history-list {
   display: grid;
   gap: 12px;
   margin-top: 18px;
@@ -690,36 +664,6 @@ p {
   text-align: center;
 }
 
-.library-list article {
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: var(--surface-soft);
-  padding: 16px;
-}
-
-.library-list article div {
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.library-list strong {
-  color: var(--green);
-  font-weight: 900;
-}
-
-.library-list span {
-  color: var(--amber);
-  font-size: 0.82rem;
-  font-weight: 900;
-}
-
-.library-list p {
-  margin: 9px 0 0;
-  font-size: 0.92rem;
-  line-height: 1.55;
-}
-
 @media (max-width: 980px) {
   .hero-panel {
     grid-template-columns: 1fr;
@@ -732,8 +676,7 @@ p {
     flex-direction: column;
   }
 
-  .control-panel,
-  .stack-panel {
+  .control-panel {
     flex-basis: auto;
     width: 100%;
   }
@@ -766,8 +709,7 @@ p {
   .hero-panel,
   .control-panel,
   .viewer-panel,
-  .history-panel,
-  .stack-panel {
+  .history-panel {
     border-radius: 24px;
     padding: 20px;
   }
@@ -787,8 +729,7 @@ p {
 
   .viewer-header,
   .panel-heading.horizontal,
-  .page-toolbar,
-  .library-list article div {
+  .page-toolbar {
     align-items: flex-start;
     flex-direction: column;
   }

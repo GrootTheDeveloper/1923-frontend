@@ -3,39 +3,16 @@ import { extractDocument, getDocument, getDocuments } from "./api/documentServic
 
 const workflowSteps = [
   {
-    title: "Upload source",
-    detail: "Choose a CV or JD PDF with selectable text.",
+    title: "Choose a document",
+    detail: "Upload a CV or job description in PDF format.",
   },
   {
-    title: "Extract text",
-    detail: "FastAPI uses PyMuPDF to read each page.",
+    title: "Review extracted text",
+    detail: "Check the full document or inspect each page individually.",
   },
   {
-    title: "Prepare matching",
-    detail: "MongoDB stores text for the next matching module.",
-  },
-];
-
-const libraryNotes = [
-  {
-    name: "PyMuPDF",
-    role: "MVP choice",
-    reason: "Fast, reliable page-level extraction for CV and JD PDFs.",
-  },
-  {
-    name: "pypdf",
-    role: "Lightweight option",
-    reason: "Simple setup, but less predictable with complex layouts.",
-  },
-  {
-    name: "pdfplumber",
-    role: "Layout option",
-    reason: "Useful when table or column structure matters.",
-  },
-  {
-    name: "OCR",
-    role: "Next phase",
-    reason: "Needed for scanned PDFs that do not contain real text.",
+    title: "Keep your workspace",
+    detail: "Recent documents stay available for quick review.",
   },
 ];
 
@@ -61,7 +38,7 @@ function App() {
   const [error, setError] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const [activePage, setActivePage] = useState(0);
+  const [activePage, setActivePage] = useState("all");
 
   const loadDocuments = async () => {
     setIsLoadingHistory(true);
@@ -104,7 +81,7 @@ function App() {
     const file = event.target.files?.[0];
     setError("");
     setResult(null);
-    setActivePage(0);
+    setActivePage("all");
 
     if (!file) {
       setSelectedFile(null);
@@ -132,11 +109,11 @@ function App() {
     try {
       const data = await extractDocument(selectedFile);
       setResult(data);
-      setActivePage(0);
+      setActivePage("all");
       await loadDocuments();
     } catch (requestError) {
       const detail = requestError.response?.data?.detail;
-      setError(detail || "Could not extract this PDF. Check backend and MongoDB connection.");
+      setError(detail || "Could not extract this PDF. Please check the service connection and try again.");
     } finally {
       setIsExtracting(false);
     }
@@ -149,13 +126,16 @@ function App() {
     try {
       const data = await getDocument(documentId);
       setResult(data);
-      setActivePage(0);
+      setActivePage("all");
     } catch {
       setError("Could not load the saved document.");
     }
   };
 
-  const visiblePage = result?.pages?.[activePage];
+  const visibleText =
+    activePage === "all"
+      ? result?.full_text
+      : result?.pages?.[activePage]?.text;
 
   return (
     <main className="app-shell">
@@ -164,40 +144,38 @@ function App() {
           <span>CM</span>
           <div>
             <strong>CV-JD Match Lab</strong>
-            <small>FARM PDF extraction MVP</small>
+            <small>CV and job description reader</small>
           </div>
         </a>
 
         <nav className="header-nav" aria-label="Primary navigation">
           <a href="#workspace">Workspace</a>
           <a href="#history">History</a>
-          <a href="#stack">Stack</a>
         </nav>
       </header>
 
       <section className="hero-panel" id="top">
         <div className="hero-copy">
-          <span className="section-kicker">Production-oriented demo</span>
-          <h1>Extract CV and JD text before matching candidates to roles.</h1>
+          <span className="section-kicker">Document workspace</span>
+          <h1>Read CV and job description PDFs in one clean workspace.</h1>
           <p>
-            A focused FARM workflow for tomorrow's report: React handles the workspace,
-            FastAPI processes PDF uploads, PyMuPDF extracts text, and MongoDB stores
-            extraction history for the future matching engine.
+            Upload a CV or job description, extract readable text, and review the
+            content before using it for candidate-to-role matching.
           </p>
         </div>
 
         <div className="hero-summary" aria-label="Product status">
           <div>
-            <span className="summary-value">4</span>
-            <span className="summary-label">FARM modules</span>
-          </div>
-          <div>
             <span className="summary-value">{documents.length}</span>
-            <span className="summary-label">Saved documents</span>
+            <span className="summary-label">Recent documents</span>
           </div>
           <div>
-            <span className="summary-value">{result?.library_used || "PyMuPDF"}</span>
-            <span className="summary-label">Extraction library</span>
+            <span className="summary-value">{result?.page_count || "-"}</span>
+            <span className="summary-label">Pages in view</span>
+          </div>
+          <div>
+            <span className="summary-value">{result?.char_count || "-"}</span>
+            <span className="summary-label">Characters extracted</span>
           </div>
         </div>
       </section>
@@ -219,7 +197,7 @@ function App() {
           <div className="panel-heading">
             <span className="section-kicker">Input</span>
             <h2>Document intake</h2>
-            <p>Upload a PDF source. This MVP extracts text only; matching comes next.</p>
+            <p>Upload a CV or job description PDF to make its content easy to review.</p>
           </div>
 
           <div className="type-toggle" aria-label="Document type">
@@ -254,14 +232,6 @@ function App() {
           </button>
 
           {error && <div className="alert alert-error">{error}</div>}
-
-          <div className="readiness-card">
-            <strong>Ready for next milestone</strong>
-            <p>
-              The extracted text can become input for keyword matching, skill scoring,
-              and CV-to-JD fit explanation.
-            </p>
-          </div>
         </aside>
 
         <section className="viewer-panel">
@@ -272,7 +242,7 @@ function App() {
             </div>
             {result && (
               <span className={result.saved_to_mongodb ? "status-pill success" : "status-pill warning"}>
-                {result.saved_to_mongodb ? "Stored in MongoDB" : "Preview only"}
+                {result.saved_to_mongodb ? "Saved" : "Preview only"}
               </span>
             )}
           </div>
@@ -289,8 +259,8 @@ function App() {
                   <small>Characters</small>
                 </article>
                 <article>
-                  <span>{result.library_used}</span>
-                  <small>Library</small>
+                  <span>{result.saved_to_mongodb ? "Saved" : "Local"}</span>
+                  <small>Status</small>
                 </article>
               </div>
 
@@ -299,6 +269,13 @@ function App() {
               <div className="page-toolbar">
                 <span>Page preview</span>
                 <div className="page-tabs">
+                  <button
+                    className={activePage === "all" ? "active" : ""}
+                    onClick={() => setActivePage("all")}
+                    type="button"
+                  >
+                    All text
+                  </button>
                   {result.pages.map((page, index) => (
                     <button
                       key={page.page_number}
@@ -313,7 +290,7 @@ function App() {
               </div>
 
               <pre className="text-preview">
-                {visiblePage?.text || "No selectable text found on this page. OCR is needed for scanned PDFs."}
+                {visibleText || "No selectable text found. Scanned PDFs may need OCR."}
               </pre>
             </>
           ) : (
@@ -330,7 +307,7 @@ function App() {
         <section className="history-panel" id="history">
           <div className="panel-heading horizontal">
             <div>
-              <span className="section-kicker">MongoDB history</span>
+              <span className="section-kicker">History</span>
               <h2>Recent extractions</h2>
             </div>
             {isLoadingHistory && <small>Loading...</small>}
@@ -355,28 +332,9 @@ function App() {
           ) : (
             <div className="empty-compact">
               <strong>No saved documents yet</strong>
-              <p>When MongoDB is connected, successful uploads will appear here.</p>
+              <p>Successful uploads will appear here once they are saved.</p>
             </div>
           )}
-        </section>
-
-        <section className="stack-panel" id="stack">
-          <div className="panel-heading">
-            <span className="section-kicker">PDF library decision</span>
-            <h2>Extraction stack</h2>
-          </div>
-
-          <div className="library-list">
-            {libraryNotes.map((library) => (
-              <article key={library.name}>
-                <div>
-                  <strong>{library.name}</strong>
-                  <span>{library.role}</span>
-                </div>
-                <p>{library.reason}</p>
-              </article>
-            ))}
-          </div>
         </section>
       </section>
     </main>
