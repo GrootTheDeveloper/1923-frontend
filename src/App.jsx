@@ -310,30 +310,6 @@ function App() {
           {error && <div className="alert alert-error">{error}</div>}
         </div>
 
-        <div className="hero-preview" aria-hidden="true">
-          <div className="browser-card">
-            <div className="window-dots">
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="score-mini">
-              <strong>Resume Score</strong>
-              <div className="mini-gauge">
-                <span />
-              </div>
-              <b>--/100</b>
-            </div>
-            <div className="content-mini">
-              <span />
-              <span />
-              <span />
-              <div />
-              <span />
-              <span />
-            </div>
-          </div>
-        </div>
       </section>
 
       <section className="dual-system-section" id="how">

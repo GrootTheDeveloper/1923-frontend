@@ -120,8 +120,7 @@ a {
 .hero-section {
   position: relative;
   align-items: center;
-  justify-content: space-between;
-  gap: 56px;
+  justify-content: center;
   min-height: 820px;
   padding: 110px max(7.5vw, 36px) 70px;
   background:
@@ -153,7 +152,8 @@ a {
 .hero-copy {
   position: relative;
   z-index: 1;
-  width: min(720px, 100%);
+  width: min(880px, 100%);
+  text-align: center;
 }
 
 .breadcrumb,
@@ -187,13 +187,15 @@ h3 {
 
 .hero-copy h1 {
   margin: 54px 0 26px;
-  max-width: 760px;
+  max-width: 880px;
   font-size: clamp(3.4rem, 6.5vw, 6.7rem);
   line-height: 1.02;
 }
 
 .hero-copy > p {
-  max-width: 720px;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
   color: #46535a;
   font-size: 1.35rem;
   line-height: 1.55;
@@ -201,7 +203,7 @@ h3 {
 
 .hero-upload {
   width: min(500px, 100%);
-  margin-top: 34px;
+  margin: 34px auto 0;
   border: 1.8px dashed var(--green);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.54);
@@ -263,121 +265,6 @@ h3 {
   margin-right: 8px;
   color: var(--green-dark);
   font-size: 0.72rem;
-}
-
-.hero-preview {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  min-width: 460px;
-}
-
-.browser-card {
-  position: relative;
-  width: min(720px, 100%);
-  min-height: 430px;
-  border: 14px solid rgba(255, 255, 255, 0.55);
-  border-radius: 28px;
-  background: #ffffff;
-  box-shadow: 0 28px 90px rgba(72, 72, 96, 0.23);
-  padding: 42px;
-}
-
-.window-dots {
-  position: absolute;
-  top: 16px;
-  left: 22px;
-  display: flex;
-  gap: 8px;
-}
-
-.window-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #dbe2e8;
-}
-
-.score-mini {
-  position: absolute;
-  top: 78px;
-  left: 52px;
-  width: 180px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: #ffffff;
-  padding: 22px;
-  text-align: center;
-}
-
-.mini-gauge {
-  position: relative;
-  height: 58px;
-  margin: 10px auto;
-  overflow: hidden;
-}
-
-.mini-gauge::before {
-  content: "";
-  position: absolute;
-  inset: 0 18px auto;
-  height: 82px;
-  border: 12px solid #edf1f5;
-  border-bottom: 0;
-  border-radius: 90px 90px 0 0;
-}
-
-.mini-gauge span {
-  position: absolute;
-  left: 26px;
-  bottom: 7px;
-  width: 66px;
-  height: 9px;
-  border-radius: 999px;
-  background: #ff5972;
-}
-
-.score-mini b {
-  color: #ff5972;
-}
-
-.content-mini {
-  margin-left: 250px;
-  border-radius: 20px;
-  background: #edf2fa;
-  padding: 38px;
-}
-
-.content-mini span,
-.content-mini div {
-  display: block;
-  height: 14px;
-  margin-bottom: 16px;
-  border-radius: 999px;
-  background: #d8dce1;
-}
-
-.content-mini span:nth-child(2) {
-  width: 86%;
-}
-
-.content-mini span:nth-child(3) {
-  width: 72%;
-}
-
-.content-mini div {
-  height: 142px;
-  margin: 26px 0;
-  border: 1px solid #e1e5ea;
-  background: #ffffff;
-}
-
-.content-mini span:nth-child(5) {
-  width: 94%;
-}
-
-.content-mini span:nth-child(6) {
-  width: 68%;
 }
 
 .dual-system-section {
@@ -1029,7 +916,6 @@ h3 {
     display: flex;
   }
 
-  .hero-preview,
   .score-panel {
     width: 100%;
     min-width: 0;
@@ -1071,22 +957,6 @@ h3 {
   }
 
   .hero-upload {
-    padding: 24px;
-  }
-
-  .browser-card {
-    min-height: 360px;
-    padding: 28px;
-  }
-
-  .score-mini {
-    position: static;
-    width: 100%;
-    margin-bottom: 18px;
-  }
-
-  .content-mini {
-    margin-left: 0;
     padding: 24px;
   }
 
