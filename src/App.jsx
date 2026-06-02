@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
 import { extractDocument, getDocument, getDocuments } from "./api/documentService";
 
-const workflowSteps = [
+const processSteps = [
+  "Uploading CV",
+  "Reading document text",
+  "Preparing review",
+];
+
+const checklistCards = [
   {
-    title: "Choose a document",
-    detail: "Upload a CV or job description in PDF format.",
+    title: "Content",
+    items: ["Readable CV text", "Clear sections", "Keyword-ready content"],
   },
   {
-    title: "Review extracted text",
-    detail: "Check the full document or inspect each page individually.",
+    title: "Format",
+    items: ["PDF file support", "Page-by-page review", "Complete text preview"],
   },
   {
-    title: "Keep your workspace",
-    detail: "Recent documents stay available for quick review.",
+    title: "CV sections",
+    items: ["Contact information", "Experience details", "Skills and education"],
+  },
+  {
+    title: "Review",
+    items: ["Extracted text history", "All-text mode", "Page inspection"],
   },
 ];
 
@@ -31,8 +41,8 @@ function formatSize(file) {
 }
 
 function App() {
+  const [screen, setScreen] = useState("landing");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [documentType, setDocumentType] = useState("CV");
   const [result, setResult] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [error, setError] = useState("");
@@ -77,43 +87,38 @@ function App() {
     };
   }, []);
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
-    setError("");
-    setResult(null);
-    setActivePage("all");
+    event.target.value = "";
 
-    if (!file) {
-      setSelectedFile(null);
-      return;
-    }
+    if (!file) return;
 
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
       setSelectedFile(null);
-      setError("Please choose a PDF file before extracting text.");
+      setError("Please choose a PDF CV file.");
       return;
     }
 
     setSelectedFile(file);
+    await handleExtract(file);
   };
 
-  const handleExtract = async () => {
-    if (!selectedFile) {
-      setError("Choose a CV or JD PDF first.");
-      return;
-    }
-
-    setIsExtracting(true);
+  const handleExtract = async (file) => {
     setError("");
+    setIsExtracting(true);
+    setResult(null);
+    setActivePage("all");
+    setScreen("processing");
 
     try {
-      const data = await extractDocument(selectedFile);
+      const data = await extractDocument(file);
       setResult(data);
-      setActivePage("all");
+      setScreen("results");
       await loadDocuments();
     } catch (requestError) {
       const detail = requestError.response?.data?.detail;
-      setError(detail || "Could not extract this PDF. Please check the service connection and try again.");
+      setError(detail || "Could not read this CV. Please try another PDF file.");
+      setScreen("landing");
     } finally {
       setIsExtracting(false);
     }
@@ -123,12 +128,15 @@ function App() {
     if (!documentId) return;
 
     setError("");
+    setScreen("processing");
     try {
       const data = await getDocument(documentId);
       setResult(data);
       setActivePage("all");
+      setScreen("results");
     } catch {
-      setError("Could not load the saved document.");
+      setError("Could not load the saved CV.");
+      setScreen("landing");
     }
   };
 
@@ -137,205 +145,282 @@ function App() {
       ? result?.full_text
       : result?.pages?.[activePage]?.text;
 
-  return (
-    <main className="app-shell">
-      <header className="product-header">
-        <a className="brand-mark" href="#top" aria-label="CV-JD Match Lab home">
-          <span>CM</span>
-          <div>
-            <strong>CV-JD Match Lab</strong>
-            <small>CV and job description reader</small>
-          </div>
-        </a>
+  const uploadControl = (
+    <label className="upload-box">
+      <input type="file" accept="application/pdf" onChange={handleFileChange} disabled={isExtracting} />
+      <span className="upload-title">{selectedFile ? selectedFile.name : "Upload Your CV"}</span>
+      <small>{selectedFile ? formatSize(selectedFile) : "PDF only. Selectable text works best."}</small>
+    </label>
+  );
 
-        <nav className="header-nav" aria-label="Primary navigation">
-          <a href="#workspace">Workspace</a>
+  if (screen === "processing") {
+    return (
+      <main className="app-shell processing-shell">
+        <section className="processing-card">
+          <div className="processing-visual">
+            <div className="scan-frame">
+              <div className="scan-line" />
+              <div className="document-skeleton">
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </div>
+
+          <div className="processing-copy">
+            <span className="section-kicker">CV Checker</span>
+            <h1>Reading your CV</h1>
+            <p>We are extracting text from your PDF and preparing it for review.</p>
+
+            <div className="progress-track">
+              <span />
+            </div>
+
+            <div className="process-list">
+              {processSteps.map((step, index) => (
+                <article key={step}>
+                  <span>{index + 1}</span>
+                  <strong>{step}</strong>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (screen === "results" && result) {
+    return (
+      <main className="app-shell result-shell">
+        <header className="simple-header">
+          <button type="button" onClick={() => setScreen("landing")}>
+            Back to checker
+          </button>
+          <strong>CV Checker Result</strong>
+        </header>
+
+        <section className="result-layout">
+          <aside className="score-panel">
+            <span className="section-kicker">Score</span>
+            <h1>Pending</h1>
+            <p>
+              The current version has extracted your CV text. A match score will appear
+              after job description comparison is connected.
+            </p>
+
+            <div className="score-meter" aria-label="Score pending">
+              <div />
+              <span>--</span>
+            </div>
+
+            <div className="result-stats">
+              <article>
+                <strong>{result.page_count}</strong>
+                <span>Pages</span>
+              </article>
+              <article>
+                <strong>{result.char_count}</strong>
+                <span>Characters</span>
+              </article>
+              <article>
+                <strong>{result.saved_to_mongodb ? "Saved" : "Preview"}</strong>
+                <span>Status</span>
+              </article>
+            </div>
+          </aside>
+
+          <section className="cv-text-panel">
+            <div className="result-heading">
+              <div>
+                <span className="section-kicker">Extracted CV</span>
+                <h2>{result.filename}</h2>
+              </div>
+              <label className="secondary-upload">
+                Upload another CV
+                <input type="file" accept="application/pdf" onChange={handleFileChange} disabled={isExtracting} />
+              </label>
+            </div>
+
+            {result.storage_error && <div className="alert alert-warning">{result.storage_error}</div>}
+
+            <div className="page-toolbar">
+              <span>View mode</span>
+              <div className="page-tabs">
+                <button
+                  className={activePage === "all" ? "active" : ""}
+                  onClick={() => setActivePage("all")}
+                  type="button"
+                >
+                  All text
+                </button>
+                {result.pages.map((page, index) => (
+                  <button
+                    key={page.page_number}
+                    className={index === activePage ? "active" : ""}
+                    onClick={() => setActivePage(index)}
+                    type="button"
+                  >
+                    Page {page.page_number}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <pre className="text-preview">
+              {visibleText || "No selectable text found. Scanned PDFs may need OCR."}
+            </pre>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="app-shell landing-shell">
+      <header className="landing-header">
+        <a href="#top" className="brand">
+          <span>CV</span>
+          <strong>CV Checker</strong>
+        </a>
+        <nav>
+          <a href="#how">How it works</a>
+          <a href="#checks">Checks</a>
           <a href="#history">History</a>
         </nav>
       </header>
 
-      <section className="hero-panel" id="top">
+      <section className="hero-section" id="top">
         <div className="hero-copy">
-          <span className="section-kicker">Document workspace</span>
-          <h1>Read CV and job description PDFs in one clean workspace.</h1>
+          <div className="breadcrumb">Home / CV Checker</div>
+          <h1>The CV checker that prepares your resume for review.</h1>
           <p>
-            Upload a CV or job description, extract readable text, and review the
-            content before using it for candidate-to-role matching.
+            Upload your CV PDF, extract readable content, and review the text before
+            comparing it with a job description.
           </p>
+
+          <div className="hero-upload">
+            <p>Drop your CV here or choose a file.</p>
+            {uploadControl}
+            <strong className="privacy-note">Privacy focused. Your CV is only used for this review.</strong>
+          </div>
+
+          {error && <div className="alert alert-error">{error}</div>}
         </div>
 
-        <div className="hero-summary" aria-label="Product status">
-          <div>
-            <span className="summary-value">{documents.length}</span>
-            <span className="summary-label">Recent documents</span>
-          </div>
-          <div>
-            <span className="summary-value">{result?.page_count || "-"}</span>
-            <span className="summary-label">Pages in view</span>
-          </div>
-          <div>
-            <span className="summary-value">{result?.char_count || "-"}</span>
-            <span className="summary-label">Characters extracted</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="workflow-strip" aria-label="CV-JD extraction workflow">
-        {workflowSteps.map((step, index) => (
-          <article key={step.title}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <strong>{step.title}</strong>
-              <p>{step.detail}</p>
+        <div className="hero-preview" aria-hidden="true">
+          <div className="browser-card">
+            <div className="window-dots">
+              <span />
+              <span />
+              <span />
             </div>
-          </article>
-        ))}
+            <div className="score-mini">
+              <strong>Resume Score</strong>
+              <div className="mini-gauge">
+                <span />
+              </div>
+              <b>--/100</b>
+            </div>
+            <div className="content-mini">
+              <span />
+              <span />
+              <span />
+              <div />
+              <span />
+              <span />
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="workspace" id="workspace">
-        <aside className="control-panel">
-          <div className="panel-heading">
-            <span className="section-kicker">Input</span>
-            <h2>Document intake</h2>
-            <p>Upload a CV or job description PDF to make its content easy to review.</p>
+      <section className="dual-system-section" id="how">
+        <div className="grader-illustration" aria-hidden="true">
+          <div className="grader-machine">
+            <strong>RESUME GRADER</strong>
+            <div className="gauge" />
+            <div className="paper-feed" />
+          </div>
+          <div className="resume-sheet">
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+
+        <div className="dual-copy">
+          <h2>Review your CV through a structured reading flow.</h2>
+          <p>
+            A good checker starts by understanding the document itself: the content,
+            sections, and text that can later be compared against a job description.
+          </p>
+
+          <div className="numbered-point">
+            <span>1</span>
+            <div>
+              <h3>Content interpretation</h3>
+              <p>We extract the CV text so it can be reviewed clearly and consistently.</p>
+            </div>
           </div>
 
-          <div className="type-toggle" aria-label="Document type">
-            {["CV", "JD"].map((type) => (
-              <button
-                key={type}
-                className={documentType === type ? "active" : ""}
-                onClick={() => setDocumentType(type)}
-                type="button"
-              >
-                {type}
+          <div className="numbered-point">
+            <span>2</span>
+            <div>
+              <h3>Document readiness</h3>
+              <p>The extracted result helps identify whether the CV is readable enough for matching.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="checklist-section" id="checks">
+        <div className="checklist-heading">
+          <h2>Beyond typographical errors</h2>
+          <p>Start with a readable CV foundation before moving into role-fit scoring.</p>
+        </div>
+
+        <div className="checklist-grid">
+          {checklistCards.map((card) => (
+            <article key={card.title}>
+              <span className="check-icon">✓</span>
+              <h3>{card.title}</h3>
+              {card.items.map((item) => (
+                <p key={item}>
+                  <span>✓</span>
+                  {item}
+                </p>
+              ))}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="history-section" id="history">
+        <div>
+          <span className="section-kicker">Recent documents</span>
+          <h2>Open a saved extraction</h2>
+        </div>
+        {isLoadingHistory ? (
+          <p>Loading recent CVs...</p>
+        ) : documents.length > 0 ? (
+          <div className="history-list">
+            {documents.map((document) => (
+              <button key={document.id} onClick={() => handleOpenHistory(document.id)} type="button">
+                <strong>{document.filename}</strong>
+                <span>
+                  {document.page_count} pages / {document.char_count} chars /{" "}
+                  {formatDate(document.created_at)}
+                </span>
               </button>
             ))}
           </div>
-
-          <label className="upload-dropzone">
-            <input type="file" accept="application/pdf" onChange={handleFileChange} />
-            <span className="file-badge">{documentType}</span>
-            <strong>{selectedFile ? selectedFile.name : `Upload ${documentType} PDF`}</strong>
-            <small>
-              {selectedFile ? formatSize(selectedFile) : "PDF with selectable text is recommended"}
-            </small>
-          </label>
-
-          <button
-            className="primary-button"
-            disabled={isExtracting}
-            onClick={handleExtract}
-            type="button"
-          >
-            {isExtracting ? "Extracting text..." : "Extract PDF text"}
-          </button>
-
-          {error && <div className="alert alert-error">{error}</div>}
-        </aside>
-
-        <section className="viewer-panel">
-          <div className="viewer-header">
-            <div>
-              <span className="section-kicker">Output</span>
-              <h2>Extraction result</h2>
-            </div>
-            {result && (
-              <span className={result.saved_to_mongodb ? "status-pill success" : "status-pill warning"}>
-                {result.saved_to_mongodb ? "Saved" : "Preview only"}
-              </span>
-            )}
-          </div>
-
-          {result ? (
-            <>
-              <div className="metrics-grid">
-                <article>
-                  <span>{result.page_count}</span>
-                  <small>Pages</small>
-                </article>
-                <article>
-                  <span>{result.char_count}</span>
-                  <small>Characters</small>
-                </article>
-                <article>
-                  <span>{result.saved_to_mongodb ? "Saved" : "Local"}</span>
-                  <small>Status</small>
-                </article>
-              </div>
-
-              {result.storage_error && <div className="alert alert-warning">{result.storage_error}</div>}
-
-              <div className="page-toolbar">
-                <span>Page preview</span>
-                <div className="page-tabs">
-                  <button
-                    className={activePage === "all" ? "active" : ""}
-                    onClick={() => setActivePage("all")}
-                    type="button"
-                  >
-                    All text
-                  </button>
-                  {result.pages.map((page, index) => (
-                    <button
-                      key={page.page_number}
-                      className={index === activePage ? "active" : ""}
-                      onClick={() => setActivePage(index)}
-                      type="button"
-                    >
-                      {page.page_number}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <pre className="text-preview">
-                {visibleText || "No selectable text found. Scanned PDFs may need OCR."}
-              </pre>
-            </>
-          ) : (
-            <div className="empty-viewer">
-              <span>PDF</span>
-              <strong>No document extracted yet</strong>
-              <p>Choose a CV or JD PDF on the left to generate the first text preview.</p>
-            </div>
-          )}
-        </section>
-      </section>
-
-      <section className="support-grid">
-        <section className="history-panel" id="history">
-          <div className="panel-heading horizontal">
-            <div>
-              <span className="section-kicker">History</span>
-              <h2>Recent extractions</h2>
-            </div>
-            {isLoadingHistory && <small>Loading...</small>}
-          </div>
-
-          {documents.length > 0 ? (
-            <div className="history-list">
-              {documents.map((document) => (
-                <button key={document.id} onClick={() => handleOpenHistory(document.id)} type="button">
-                  <span className="history-icon">PDF</span>
-                  <div>
-                    <strong>{document.filename}</strong>
-                    <small>
-                      {document.page_count} pages / {document.char_count} chars /{" "}
-                      {formatDate(document.created_at)}
-                    </small>
-                    <p>{document.text_preview || "No preview available"}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-compact">
-              <strong>No saved documents yet</strong>
-              <p>Successful uploads will appear here once they are saved.</p>
-            </div>
-          )}
-        </section>
+        ) : (
+          <p>No saved CV extractions yet.</p>
+        )}
       </section>
     </main>
   );
