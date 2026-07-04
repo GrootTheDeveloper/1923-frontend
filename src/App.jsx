@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createJob, getCvs, getJobMatches, getJobs, getMatchJob, getRecruitmentAnalytics, seedDemoData, startMatchJob, submitMatchFeedback, trainRanker, updateMatchStatus, uploadCv } from "./api/cvmatchService";
+import { createJob, getCvs, getJobMatches, getJobs, getMatchJob, getRecruitmentAnalytics, seedDemoData, startMatchJob, submitMatchFeedback, updateMatchStatus, uploadCv } from "./api/cvmatchService";
 
 const paths = {
   grid: ["M4 4h6v6H4z", "M14 4h6v6h-6z", "M4 14h6v6H4z", "M14 14h6v6h-6z"],
@@ -37,10 +37,9 @@ export default function App() {
   }
   async function addJob(event) { event.preventDefault(); setWorking("job"); try { const created = await createJob({ raw_text: jd }); setJobs((x) => [created, ...x]); setJobId(created.id); setJd(""); setMatches([]); setMatch(null); setNotice({ type: "success", text: "JD đã được cấu trúc hóa. Hãy kiểm tra tiêu chí trước khi matching." }); } catch (error) { setNotice({ type: "error", text: messageOf(error) }); } finally { setWorking(""); } }
   async function addCvs(event) { const files = [...(event.target.files || [])]; event.target.value = ""; if (!files.length) return; setWorking("upload"); try { await Promise.all(files.map(uploadCv)); setCvs(await getCvs()); setNotice({ type: "success", text: `${files.length} CV đã được parse, mask PII và index.` }); } catch (error) { setNotice({ type: "error", text: messageOf(error) }); } finally { setWorking(""); } }
-  async function feedback(verdict) { if (!match) return; setWorking("feedback"); try { await submitMatchFeedback(match.id, { verdict, reason: "HR review workspace" }); setAnalytics(await getRecruitmentAnalytics()); setNotice({ type: "success", text: "Feedback đã vào audit trail và tập nhãn cải thiện model." }); } catch (error) { setNotice({ type: "error", text: messageOf(error) }); } finally { setWorking(""); } }
-  async function pipeline(status) { const updated = await updateMatchStatus(match.id, { pipeline_status: status, note: match.note || "" }); setMatch(updated); setMatches((x) => x.map((item) => item.id === updated.id ? updated : item)); }
+  async function feedback(verdict) { if (!match) return; setWorking("feedback"); try { await submitMatchFeedback(match.id, { verdict, reason: "HR review workspace" }); await sleep(500); setAnalytics(await getRecruitmentAnalytics()); setNotice({ type: "success", text: "Feedback đã vào audit trail; AI tự học lại từ nhãn mới." }); } catch (error) { setNotice({ type: "error", text: messageOf(error) }); } finally { setWorking(""); } }
+  async function pipeline(status) { const updated = await updateMatchStatus(match.id, { pipeline_status: status, note: match.note || "" }); setMatch(updated); setMatches((x) => x.map((item) => item.id === updated.id ? updated : item)); await sleep(500); setAnalytics(await getRecruitmentAnalytics()); }
   async function demo() { setWorking("demo"); try { await seedDemoData(); await refresh(); } finally { setWorking(""); } }
-  async function trainModel() { setWorking("train"); setNotice({ type: "", text: "" }); try { const result = await trainRanker(); if (result.status === "trained") { setAnalytics(await getRecruitmentAnalytics()); setNotice({ type: "success", text: `Model ${result.version} đã train từ ${result.labeled_samples} nhãn. Chạy lại matching để dùng model học.` }); } else { setNotice({ type: "error", text: result.note || "Chưa đủ dữ liệu để train." }); } } catch (error) { setNotice({ type: "error", text: messageOf(error) }); } finally { setWorking(""); } }
   const confidence = matches.length ? Math.round(matches.reduce((sum, x) => sum + (x.confidence_score || 0), 0) / matches.length) : 0;
 
   return <div className="app-frame">
@@ -66,9 +65,9 @@ export default function App() {
           <DisparateImpact dims={analytics?.fairness?.group_fairness?.dimensions} />
           <p>{analytics?.fairness?.notice}</p>
         </article>
-        <article className="gaps-card"><Heading index="Model quality" title="Learning-to-rank" />
-          <div className="fairness-stats"><Score label="NDCG@5" value={analytics?.rankingEval?.ndcg_at_5 ?? "—"} /><Score label="MAP" value={analytics?.rankingEval?.map ?? "—"} /><Score label="Model active" value={analytics?.rankingEval?.active_model ? "Learned" : "Heuristic"} /></div>
-          <button className="secondary-button" onClick={trainModel} disabled={Boolean(working)} style={{ marginTop: 10 }}>{working === "train" ? "Đang train…" : "Train ranker từ feedback"}</button>
+        <article className="gaps-card"><Heading index="Chất lượng gợi ý" title="AI học từ feedback" />
+          <div className="fairness-stats"><Score label="NDCG@5" value={analytics?.rankingEval?.ndcg_at_5 ?? "—"} /><Score label="MAP" value={analytics?.rankingEval?.map ?? "—"} /><Score label="Nguồn xếp hạng" value={analytics?.rankingEval?.active_model ? "Đã học" : "Mặc định"} /></div>
+          <p style={{ marginTop: 8, fontSize: 12, opacity: 0.7 }}>Hệ thống tự học từ shortlist/feedback của HR sau mỗi lượt đánh giá — không cần thao tác thủ công. {analytics?.rankingEval?.active_model ? "Đang dùng model đã học từ đội của bạn." : "Sẽ tự kích hoạt khi đủ dữ liệu phản hồi."}</p>
           <div className="divider" style={{ margin: "14px 0 10px" }}><span>Skill gaps</span></div>
           <div className="gap-cloud">{(analytics?.skills?.top_gaps || []).slice(0, 6).map((x) => <span key={x.skill}>{x.skill}<b>{x.count}</b></span>)}</div>
         </article>
