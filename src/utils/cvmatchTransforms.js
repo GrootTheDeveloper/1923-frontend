@@ -81,6 +81,7 @@ export function formatBreakdownLabel(key) {
     experience_project_score: "Điểm kinh nghiệm & dự án",
     education_language_certification_score: "Điểm học vấn/ngoại ngữ/chứng chỉ",
     completeness_score: "Độ đầy đủ hồ sơ",
+    semantic_score: "\u0110i\u1ec3m t\u01b0\u01a1ng \u0111\u1ed3ng n\u1ed9i dung",
     penalty_score: "Điểm phạt (Knockout)",
   };
   return labels[key] || key.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
