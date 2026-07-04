@@ -29,7 +29,35 @@ export const deleteCv = (cvId) =>
 export const runMatching = (payload) =>
   axiosClient.post("/matches/run", payload).then((response) => response.data);
 
+export const startMatchJob = (jobId, payload = {}) =>
+  axiosClient.post(`/jobs/${jobId}/match`, payload).then((response) => response.data);
+
+export const getMatchJob = (matchJobId) =>
+  axiosClient.get(`/match-jobs/${matchJobId}`).then((response) => response.data);
+
+export const getJobMatches = (jobId) =>
+  axiosClient.get(`/jobs/${jobId}/matches`).then((response) => response.data);
+
+export const submitMatchFeedback = (matchId, payload) =>
+  axiosClient.post(`/matches/${matchId}/feedback`, payload).then((response) => response.data);
+
+export const getRecruitmentAnalytics = () =>
+  Promise.all([
+    axiosClient.get("/analytics/model-quality"),
+    axiosClient.get("/analytics/fairness"),
+    axiosClient.get("/analytics/pipeline-health"),
+    axiosClient.get("/analytics/skill-gaps"),
+    axiosClient.get("/analytics/ranking-eval"),
+  ]).then(([quality, fairness, pipeline, skills, rankingEval]) => ({
+    quality: quality.data, fairness: fairness.data, pipeline: pipeline.data,
+    skills: skills.data, rankingEval: rankingEval.data,
+  }));
+
+export const trainRanker = () =>
+  axiosClient.post("/analytics/train-ranker").then((response) => response.data);
+
 export const getMatches = (jobId) => {
+
   const query = jobId ? `?job_id=${jobId}` : "";
   return axiosClient.get(`/matches${query}`).then((response) => response.data);
 };
