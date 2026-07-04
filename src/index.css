@@ -507,6 +507,77 @@ select:focus {
   padding: 10px;
 }
 
+.score-stack {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.priority-badge,
+.priority-label {
+  color: var(--blue);
+  font-weight: 900;
+}
+
+.priority-badge {
+  border: 1px solid rgba(43, 111, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(43, 111, 255, 0.08);
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.match-explanation {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(43, 111, 255, 0.18);
+  border-radius: 8px;
+  background: #f7faff;
+  padding: 12px;
+}
+
+.match-explanation header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.match-explanation header span,
+.match-explanation div > span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.match-explanation header strong {
+  color: var(--blue);
+  font-size: 0.84rem;
+}
+
+.match-explanation p,
+.match-explanation ul {
+  margin: 0;
+}
+
+.match-explanation p {
+  color: #263445;
+  line-height: 1.5;
+}
+
+.match-explanation ul {
+  display: grid;
+  gap: 5px;
+  padding-left: 18px;
+}
+
+.match-explanation li {
+  color: #3b4758;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
 .breakdown {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -11,6 +11,9 @@ export default function MatchDetail({ match, noteDraft, setNoteDraft, onUpdateSt
     );
   }
 
+  const explanation = match.match_explanation || {};
+  const priorityScore = match.recruiter_priority_score ?? match.final_score;
+
   return (
     <section className="match-detail">
       <div className="detail-title">
@@ -18,7 +21,10 @@ export default function MatchDetail({ match, noteDraft, setNoteDraft, onUpdateSt
           <h3>{match.candidate_name}</h3>
           <span>{match.candidate_email || match.filename}</span>
         </div>
-        <ScoreBadge score={match.final_score} />
+        <div className="score-stack">
+          <ScoreBadge score={match.final_score} />
+          <span className="priority-badge">Ưu tiên {priorityScore}%</span>
+        </div>
       </div>
 
       {match.is_outdated && (
@@ -28,6 +34,19 @@ export default function MatchDetail({ match, noteDraft, setNoteDraft, onUpdateSt
       )}
 
       <p className="recommendation">{match.recommendation}</p>
+
+      {explanation.summary && (
+        <div className="match-explanation">
+          <header>
+            <span>Giải thích ưu tiên</span>
+            <strong>{match.recruiter_priority || "Review carefully"}</strong>
+          </header>
+          <p>{explanation.summary}</p>
+          <ExplanationList title="Điểm mạnh" items={explanation.strengths || []} />
+          <ExplanationList title="Cần xác minh" items={explanation.risks || []} />
+          <ExplanationList title="Bước tiếp theo" items={explanation.next_steps || []} />
+        </div>
+      )}
 
       <div className="breakdown">
         {Object.entries(match.score_breakdown || {}).map(([key, value]) => (
@@ -74,6 +93,20 @@ export default function MatchDetail({ match, noteDraft, setNoteDraft, onUpdateSt
         )}
       </div>
     </section>
+  );
+}
+
+function ExplanationList({ title, items }) {
+  if (!items.length) return null;
+  return (
+    <div>
+      <span>{title}</span>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

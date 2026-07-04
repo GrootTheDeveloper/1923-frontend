@@ -51,6 +51,11 @@ export default function RankingList({
               <div>
                 <strong>{match.candidate_name}</strong>
                 <small>{statusMap[match.pipeline_status] || match.pipeline_status} / {matchLevelMap[match.match_level] || match.match_level}</small>
+                {match.recruiter_priority && (
+                  <small className="priority-label">
+                    Ưu tiên: {match.recruiter_priority} ({match.recruiter_priority_score ?? match.final_score}%)
+                  </small>
+                )}
                 {match.is_outdated && <small className="outdated-label">Cần chạy lại đối chiếu</small>}
               </div>
               <ScoreBadge score={match.final_score} />
