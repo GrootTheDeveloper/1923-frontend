@@ -61,6 +61,8 @@ h1, h2, h3, .brand-mark strong { font-family: var(--font-heading); letter-spacin
 .app-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: max-content minmax(0, 1fr);
+  align-content: start;
   min-height: 100dvh;
 }
 
@@ -68,6 +70,7 @@ h1, h2, h3, .brand-mark strong { font-family: var(--font-heading); letter-spacin
   position: sticky;
   top: 0;
   z-index: 30;
+  align-self: start;
   display: grid;
   grid-template-columns: 230px minmax(360px, 1fr) minmax(300px, 420px) auto;
   grid-template-areas: "brand nav stats action";
