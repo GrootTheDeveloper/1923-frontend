@@ -1,41 +1,21 @@
-# CVMatch AI Frontend
+# Lattice Recruitment Matching Workbench
 
-React/Vite dashboard for the CV-JD matching MVP.
+React/Vite recruiter workbench for creating JDs, uploading CVs, running match jobs, reviewing evidence and fairness flags, recording decisions, and exporting a summary.
 
-## Local Run
+## Run
 
-Start the backend first:
-
-```bash
-cd ../1923-backend
-python -m uvicorn app.main:app --reload --port 8000
-```
-
-Start the frontend:
-
-```bash
-cd ../1923-frontend
+```powershell
 npm install
 npm run dev
 ```
 
-Use this API base when running locally:
+Set `VITE_API_BASE_URL` to the backend `/api` URL. The backend must allow the browser origin through `FRONTEND_URLS` or a narrowly scoped `CORS_ALLOW_ORIGIN_REGEX`.
 
-```text
-VITE_API_BASE_URL=http://127.0.0.1:8000/api
-```
+## Verify
 
-## Demo Flow
-
-1. Paste a JD and create it.
-2. Upload one or more selectable-text PDF CVs.
-3. Review extracted CV data and save corrections.
-4. Run matching for the selected JD.
-5. Open ranking details, inspect evidence, update status, and export CSV.
-
-## Checks
-
-```bash
+```powershell
 npm run lint
 npm run build
 ```
+
+The active application is `src/App.jsx`. Historical Project/Task pages and API clients are intentionally removed.

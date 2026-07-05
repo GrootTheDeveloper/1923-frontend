@@ -45,7 +45,7 @@ export function toRequirementsDraft(job) {
   const config = job?.requirements_config?.length
     ? job.requirements_config
     : [
-        ...(job?.required_skills || []).map((skill) => ({ name: skill, type: "skill", priority: "required", weight: 10, is_knockout: true })),
+        ...(job?.required_skills || []).map((skill) => ({ name: skill, type: "skill", priority: "required", weight: 10, is_knockout: false })),
         ...(job?.preferred_skills || []).map((skill) => ({ name: skill, type: "skill", priority: "preferred", weight: 5, is_knockout: false })),
       ];
 
