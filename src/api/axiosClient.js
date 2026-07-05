@@ -7,11 +7,19 @@ const axiosClient = axios.create({
   },
 });
 
-// Attach JWT token automatically
+// Attach JWT token or anonymous Guest ID automatically
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    // Generate a guest ID if one doesn't exist
+    let guestId = localStorage.getItem("guest_id");
+    if (!guestId) {
+      guestId = crypto.randomUUID();
+      localStorage.setItem("guest_id", guestId);
+    }
+    config.headers["X-Guest-ID"] = guestId;
   }
   return config;
 });
