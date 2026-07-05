@@ -38,6 +38,7 @@ body {
   min-height: 100dvh;
   background: linear-gradient(180deg, rgba(37, 173, 149, .05), transparent 320px), var(--color-bg);
   color: var(--color-text);
+  overflow-y: scroll;
   font: 15px/1.55 var(--font-body);
 }
 .pdf-report-root {
