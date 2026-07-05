@@ -267,6 +267,7 @@ h1, h2, h3, .brand-mark strong { font-family: var(--font-heading); letter-spacin
   background: var(--color-primary);
   color: white;
   box-shadow: 0 9px 18px rgba(16, 138, 96, .18);
+  min-width: 180px;
 }
 .primary-action:hover,
 .primary-action:focus-visible {
