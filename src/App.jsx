@@ -334,10 +334,8 @@ export default function App() {
       <main className="workspace" data-ai-id="main-workspace">
         <header className="workspace-header">
           <div><p className="eyebrow">Quy trình tuyển dụng</p><h1>{meta.title}</h1><p>{meta.subtitle}</p></div>
-          <div className="header-actions">
-            {(view === "match" || view === "summary") && (
-              <>
-                <label><span>JD đang đánh giá</span><select value={jobId} onChange={(event) => selectJobForMatching(event.target.value)}>
+          <div className="header-actions" style={{ visibility: (view === "match" || view === "summary") ? "visible" : "hidden", pointerEvents: (view === "match" || view === "summary") ? "auto" : "none" }}>
+            <label><span>JD đang đánh giá</span><select value={jobId} onChange={(event) => selectJobForMatching(event.target.value)}>
                   <option value="">Chọn JD</option>
                   {jobs.map((item) => <option key={item.id} value={item.id}>{item.title} · {item.company || "Chưa rõ công ty"}</option>)}
                 </select></label>
@@ -347,8 +345,6 @@ export default function App() {
                 {view === "summary" && <button className="primary-action" type="button" onClick={exportSummary} disabled={!job || !matches.length || working === "export"}>
                   <Icon name="download" />{working === "export" ? "Đang tạo PDF" : "Xuất báo cáo PDF"}
                 </button>}
-              </>
-            )}
           </div>
         </header>
 
