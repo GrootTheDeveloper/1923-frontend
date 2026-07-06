@@ -13,6 +13,7 @@ import {
   updateMatchStatus,
   uploadCv,
 } from "./api/cvmatchService";
+import { getTurnstileToken } from "./utils/turnstile";
 
 const paths = {
   alert: ["M12 9v4", "M12 17h.01", "M10.3 3.7 2.2 18a2 2 0 0 1 3.4 0l8.2 14.6a2 2 0 0 1-1.8 3H3.9a2 2 0 0 1-1.8-3z"],
@@ -171,7 +172,10 @@ export default function App() {
     if (!files.length) return;
     setWorking("upload");
     try {
-      await Promise.all(files.map(uploadCv));
+      for (const file of files) {
+        const token = await getTurnstileToken("upload_cv");
+        await uploadCv(file, token);
+      }
       setCvs(await getCvs());
       setNotice({ type: "success", text: `Đã thêm ${files.length} CV. Hệ thống đã trích xuất nội dung và chuẩn bị dữ liệu chấm điểm.` });
       if (jobs.length) setView("match");
