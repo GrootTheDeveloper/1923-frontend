@@ -14,6 +14,7 @@ import {
   uploadCv,
 } from "./api/cvmatchService";
 import { getTurnstileToken } from "./utils/turnstile";
+import AuthMenu from "./components/AuthMenu.jsx";
 
 const paths = {
   alert: ["M12 9v4", "M12 17h.01", "M10.3 3.7 2.2 18a2 2 0 0 1 3.4 0l8.2 14.6a2 2 0 0 1-1.8 3H3.9a2 2 0 0 1-1.8-3z"],
@@ -312,8 +313,7 @@ export default function App() {
         <nav className="checker-actions" aria-label={"H\u00e0nh \u0111\u1ed9ng b\u00e1o c\u00e1o"}>
           <Link className="new-scan-action" to="/app"><Icon name="upload" size={18} /> {"Qu\u00e9t CV m\u1edbi"}</Link>
           <button className="topbar-link" type="button" onClick={() => setView("summary")}><Icon name="doc" size={18} /> {"L\u1ecbch s\u1eed"}</button>
-          <Link className="topbar-link" to="/login">{"\u0110\u0103ng nh\u1eadp"}</Link>
-          <Link className="topbar-register" to="/register">{"\u0110\u0103ng k\u00fd"}</Link>
+          <AuthMenu />
         </nav>
       </header>
 

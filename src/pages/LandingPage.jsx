@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import AuthMenu from "../components/AuthMenu.jsx";
 
 const checks = [
   ["Độ khớp với JD", "So sánh kỹ năng, kinh nghiệm, cấp bậc và yêu cầu bắt buộc trong tin tuyển dụng."],
@@ -52,8 +53,7 @@ export default function LandingPage() {
           <a href="#faq">FAQ</a>
         </nav>
         <div className="landing-nav-actions">
-          <Link to="/login" className="landing-link">Đăng nhập</Link>
-          <Link to="/register" className="landing-link register-link">Đăng ký</Link>
+          <AuthMenu />
           <Link to="/app" className="landing-cta small">Check CV</Link>
         </div>
       </header>
