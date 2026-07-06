@@ -12,11 +12,11 @@ export const getCvs = () => axiosClient.get("/cvs").then((response) => response.
 
 export const getCv = (cvId) => axiosClient.get(`/cvs/${cvId}`).then((response) => response.data);
 
-export const uploadCv = (file) => {
+export const uploadCv = (file, turnstileToken = "") => {
   const formData = new FormData();
   formData.append("file", file);
   return axiosClient
-    .post("/cvs/upload", formData, { headers: { "Content-Type": "multipart/form-data" } })
+    .post("/cvs/upload", formData, { headers: { "Content-Type": "multipart/form-data", ...(turnstileToken ? { "X-Turnstile-Token": turnstileToken } : {}) } })
     .then((response) => response.data);
 };
 

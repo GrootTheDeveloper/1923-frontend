@@ -2,24 +2,18 @@ import axios from "axios";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Attach JWT token or anonymous Guest ID automatically
+// Attach JWT token when the user is logged in. Anonymous sessions are now
+// server-issued HttpOnly cookies, not client-chosen IDs.
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    // Generate a guest ID if one doesn't exist
-    let guestId = localStorage.getItem("guest_id");
-    if (!guestId) {
-      guestId = crypto.randomUUID();
-      localStorage.setItem("guest_id", guestId);
-    }
-    config.headers["X-Guest-ID"] = guestId;
   }
   return config;
 });
