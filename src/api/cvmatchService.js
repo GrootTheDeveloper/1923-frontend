@@ -20,6 +20,14 @@ export const uploadCv = (file, turnstileToken = "") => {
     .then((response) => response.data);
 };
 
+export const extractDocument = (file, turnstileToken = "") => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return axiosClient
+    .post("/documents/extract", formData, { headers: { "Content-Type": "multipart/form-data", ...(turnstileToken ? { "X-Turnstile-Token": turnstileToken } : {}) } })
+    .then((response) => response.data);
+};
+
 export const updateCvData = (cvId, payload) =>
   axiosClient.put(`/cvs/${cvId}/extracted-data`, payload).then((response) => response.data);
 
