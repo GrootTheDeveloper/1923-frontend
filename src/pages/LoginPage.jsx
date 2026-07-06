@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../api/authService";
+import { claimGuestSession, login } from "../api/authService";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -16,6 +16,7 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password });
       localStorage.setItem("token", res.data.access_token);
+      try { await claimGuestSession(); } catch { /* migration is best-effort */ }
       navigate("/app");
     } catch (err) {
       setError(err.response?.data?.detail || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
