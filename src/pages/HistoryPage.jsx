@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { listMatchJobs } from "../api/cvmatchService";
 import AuthMenu from "../components/AuthMenu.jsx";
+import BrandLogo from "../components/BrandLogo.jsx";
 
 const STATUS_LABEL = {
   completed: "Hoàn tất",
@@ -44,8 +45,7 @@ export default function HistoryPage() {
     <div className="checker-flow setup-mode">
       <header className="checker-topbar">
         <Link className="brand-mark" to="/" title="Về trang chủ">
-          <span>⚡</span>
-          <div><strong>TalentScan</strong><small>Lịch sử phiên quét</small></div>
+          <BrandLogo subtitle="Lịch sử phiên quét" />
         </Link>
         <nav className="checker-actions">
           <Link className="topbar-link" to="/app">Quét CV mới</Link>

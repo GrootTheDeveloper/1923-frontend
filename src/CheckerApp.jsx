@@ -15,6 +15,7 @@ import {
 } from "./api/cvmatchService";
 import { getTurnstileToken } from "./utils/turnstile";
 import AuthMenu from "./components/AuthMenu.jsx";
+import BrandLogo from "./components/BrandLogo.jsx";
 
 const paths = {
   alert: ["M12 9v4", "M12 17h.01", "M10.3 3.7 2.2 18a2 2 0 0 1 3.4 0l8.2 14.6a2 2 0 0 1-1.8 3H3.9a2 2 0 0 1-1.8-3z"],
@@ -303,8 +304,7 @@ export default function App() {
     <div className="checker-flow report-experience" data-ai-id="cv-match-workspace">
       <header className="checker-topbar report-topbar" data-ai-id="report-topbar">
         <Link className="brand-mark" to="/" title={"V\u1ec1 trang ch\u1ee7"}>
-          <span><Icon name="spark" /></span>
-          <div><strong>TalentScan</strong><small>AI CV Checker</small></div>
+          <BrandLogo subtitle="AI CV Checker" />
         </Link>
         <nav className="report-mode-tabs" aria-label={"Ch\u1ebf \u0111\u1ed9 b\u00e1o c\u00e1o"}>
           <button type="button" className={view === "match" ? "active" : ""} onClick={() => setView("match")}><Icon name="radar" size={18} /> {"Ph\u00e2n t\u00edch"}</button>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { getMe } from "../api/authService";
+import BrandLogo from "./BrandLogo.jsx";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="container navbar-container">
         <Link to="/" className="navbar-brand">
-          <span>⚡</span> Project1923
+          <BrandLogo compact />
         </Link>
         <div className="navbar-links">
           {token && user ? (

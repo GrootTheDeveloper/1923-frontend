@@ -12,6 +12,7 @@ import {
 } from "./api/cvmatchService";
 import { getTurnstileToken } from "./utils/turnstile";
 import AuthMenu from "./components/AuthMenu.jsx";
+import BrandLogo from "./components/BrandLogo.jsx";
 
 const t = {
   home: "Về trang chủ",
@@ -170,8 +171,7 @@ export default function ScanFlow() {
     <div className="checker-flow setup-mode">
       <header className="checker-topbar">
         <Link className="brand-mark" to="/" title={t.home}>
-          <span><Icon name="radar" /></span>
-          <div><strong>TalentScan</strong><small>{t.checker}</small></div>
+          <BrandLogo subtitle={t.checker} />
         </Link>
         <nav className="checker-actions">
           <Link className="topbar-link" to="/workspace"><Icon name="doc" size={18} />{t.history}</Link>
@@ -193,10 +193,11 @@ export default function ScanFlow() {
                 <span>1</span>
                 <div><h2>{t.upload}</h2><small>{t.uploadHelp}</small></div>
               </header>
-              <label className="scan-upload">
+              <label className={`scan-upload ${working === "upload" ? "is-working" : ""}`}>
                 <input type="file" accept="application/pdf" multiple onChange={addCvs} />
                 <Icon name="upload" size={28} />
                 <strong>{working === "upload" ? t.reading : t.choose}</strong>
+                {working === "upload" && <span className="scan-upload-loader" aria-hidden="true"><i /><i /><i /></span>}
                 <span>{t.multi}</span>
               </label>
               {cvs.length > 0 && (
@@ -267,10 +268,11 @@ export default function ScanFlow() {
                 </label>
               ) : (
                 <>
-                  <label className="scan-upload">
+                  <label className={`scan-upload ${working === "jd-upload" ? "is-working" : ""}`}>
                     <input type="file" accept="application/pdf" onChange={uploadJdFile} />
                     <Icon name="upload" size={28} />
                     <strong>{working === "jd-upload" ? t.jdReading : t.jdChoose}</strong>
+                    {working === "jd-upload" && <span className="scan-upload-loader" aria-hidden="true"><i /><i /><i /></span>}
                     <span>{t.jdUploadHint}</span>
                   </label>
                   {jdNotice && <div className="notice info" role="status">{jdNotice}</div>}
@@ -285,13 +287,13 @@ export default function ScanFlow() {
             </div>
 
             <button
-              className="scan-submit"
+              className={`scan-submit ${working === "job" || working === "matching" ? "is-loading" : ""}`}
               type="button"
               onClick={run}
               disabled={!ready || Boolean(working)}
             >
-              <Icon name="radar" />
-              {working === "job" ? t.preparing : t.start}
+              <span className="scan-submit-icon"><Icon name="radar" /></span>
+              <span>{working === "job" ? t.preparing : t.start}</span>
             </button>
           </div>
 
@@ -317,7 +319,13 @@ export default function ScanFlow() {
               <span className="scan-document"><Icon name="doc" size={30} /></span>
               <h2>{t.analyzing}</h2>
               <p>{t.analyzingText}</p>
-              <div className="scan-progress"><span style={{ width: progress + "%" }} /></div>
+              <div className="scan-progress" aria-label={`Tiến độ ${Math.round(progress)}%`}><span style={{ width: progress + "%" }} /></div>
+              <div className="scan-modal-steps" aria-hidden="true">
+                <span className={progress > 22 ? "done" : "active"}>Đọc JD</span>
+                <span className={progress > 48 ? "done" : progress > 22 ? "active" : ""}>So khớp CV</span>
+                <span className={progress > 74 ? "done" : progress > 48 ? "active" : ""}>Tính điểm</span>
+                <span className={progress > 88 ? "active" : ""}>Tạo báo cáo</span>
+              </div>
               <small>{t.wait}</small>
             </section>
           </div>

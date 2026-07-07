@@ -34,8 +34,7 @@ function loadTurnstile() {
 
 export async function getTurnstileToken(action = "upload_cv") {
   if (!siteKey) {
-    if (["localhost", "127.0.0.1"].includes(window.location.hostname)) return "";
-    throw new Error("Turnstile ch?a ???c c?u h?nh cho b?n production.");
+    return "";
   }
   const turnstile = await loadTurnstile();
   if (!turnstile) return "";
@@ -43,7 +42,7 @@ export async function getTurnstileToken(action = "upload_cv") {
   return new Promise((resolve, reject) => {
     const container = ensureContainer();
     const timeoutId = window.setTimeout(() => {
-      reject(new Error("Turnstile ph?n h?i qu? l?u. Vui l?ng t?i l?i trang v? th? l?i."));
+      reject(new Error("Turnstile phản hồi quá lâu. Vui lòng tải lại trang và thử lại."));
     }, 15000);
     const finish = (callback) => (value) => {
       window.clearTimeout(timeoutId);
@@ -54,7 +53,7 @@ export async function getTurnstileToken(action = "upload_cv") {
       action,
       size: "invisible",
       callback: finish(resolve),
-      "error-callback": finish(() => reject(new Error("Turnstile kh?ng x?c minh ???c hostname n?y. Vui l?ng th? l?i."))),
+      "error-callback": finish(() => reject(new Error("Turnstile không xác minh được hostname này. Nếu đang chạy qua tunnel, hãy thêm domain tunnel vào Cloudflare Turnstile hoặc tắt site key ở môi trường dev."))),
       "expired-callback": () => {
         if (widgetId !== null) turnstile.reset(widgetId);
       },

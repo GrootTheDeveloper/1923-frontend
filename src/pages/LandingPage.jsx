@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import AuthMenu from "../components/AuthMenu.jsx";
+import BrandLogo from "../components/BrandLogo.jsx";
 
 const checks = [
   ["Độ khớp với JD", "So sánh kỹ năng, kinh nghiệm, cấp bậc và yêu cầu bắt buộc trong tin tuyển dụng."],
@@ -12,15 +13,15 @@ const checks = [
 
 const steps = [
   ["01", "Dán JD", "Nhập tin tuyển dụng để AI tách kỹ năng, yêu cầu bắt buộc và tiêu chí ưu tiên."],
-  ["02", "Tải CV", "Upload một hoặc nhiều CV PDF. Guest được dùng miễn phí có giới hạn và được bảo vệ bằng Turnstile."],
+  ["02", "Tải CV", "Upload một hoặc nhiều CV PDF. Bạn có thể dùng thử miễn phí mỗi ngày; hệ thống tự nhắc khi cần đăng nhập để lưu lịch sử."],
   ["03", "Chạy phân tích", "Hệ thống đọc CV, so khớp JD, tính điểm và trích bằng chứng liên quan."],
   ["04", "Ra quyết định", "Xem report, shortlist/reject/review, gửi feedback để lần xếp hạng sau tốt hơn."],
 ];
 
 const faqs = [
-  ["Có cần đăng nhập để check CV không?", "Không bắt buộc. Bạn có thể dùng vài lượt miễn phí ở chế độ guest. Đăng nhập giúp lưu lịch sử và quản lý nhiều phiên phân tích tốt hơn."],
+  ["Có cần đăng nhập để check CV không?", "Không bắt buộc. Bạn có thể dùng thử vài lượt miễn phí. Khi đăng nhập, bạn sẽ lưu được lịch sử và mở lại các báo cáo cũ dễ hơn."],
   ["Hệ thống khác gì một CV checker thông thường?", "Hệ thống này không chỉ chấm CV chung chung. Nó so CV với một JD cụ thể, giải thích kỹ năng khớp/thiếu và hỗ trợ tổng hợp nhiều ứng viên."],
-  ["Có chống spam upload không?", "Có. Guest session, IP, subnet, concurrent quota, giới hạn file và Cloudflare Turnstile đều được bật trong flow upload public."],
+  ["Có giới hạn lượt dùng thử không?", "Có. Mỗi người có một số lượt dùng thử hợp lý mỗi ngày để dịch vụ luôn ổn định. File lớn hoặc lượt tải bất thường sẽ được kiểm tra tự động trước khi xử lý."],
   ["Dữ liệu đầu vào gồm gì?", "Bạn cần một JD và ít nhất một CV. Sau đó có thể chạy matching, xem báo cáo chi tiết và xuất PDF tổng hợp."],
 ];
 
@@ -44,8 +45,7 @@ export default function LandingPage() {
     <div className="landing-shell" data-ai-id="public-landing">
       <header className="landing-nav" data-ai-id="landing-nav">
         <Link className="landing-brand" to="/" aria-label="TalentScan home">
-          <span><MiniIcon type="scan" /></span>
-          <strong>TalentScan</strong>
+          <BrandLogo compact />
         </Link>
         <nav aria-label="Landing navigation">
           <a href="#workflow">Quy trình</a>
@@ -72,9 +72,9 @@ export default function LandingPage() {
               <a href="#sample-report" className="landing-secondary">Xem mẫu báo cáo</a>
             </div>
             <div className="hero-trust" aria-label="Product limits and protections">
-              <span><MiniIcon type="check" /> Miễn phí vài lượt/ngày</span>
+              <span><MiniIcon type="check" /> Dùng thử miễn phí mỗi ngày</span>
               <span><MiniIcon type="file" /> CV PDF tối đa 5MB</span>
-              <span><MiniIcon type="lock" /> Turnstile chống spam upload</span>
+              <span><MiniIcon type="lock" /> Tự bảo vệ khi tải file</span>
             </div>
           </div>
 
@@ -83,27 +83,75 @@ export default function LandingPage() {
               <span></span><span></span><span></span>
               <b>JD: Backend Engineer</b>
             </div>
-            <div className="preview-score">
-              <div className="preview-ring"><strong>82</strong><span>/100</span></div>
-              <div>
-                <p>Phù hợp cao</p>
-                <h2>CV có nền tảng API, database và cloud rõ ràng.</h2>
+            <div className="preview-stage-body">
+              <div className="preview-process" aria-hidden="true">
+                <div className="workflow-upload-scene">
+                  <div className="pdf-card pdf-jd">
+                    <span>PDF</span>
+                    <b>JD Backend</b>
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                  <div className="pdf-card pdf-cv">
+                    <span>PDF</span>
+                    <b>CV ứng viên</b>
+                    <i />
+                    <i />
+                    <i />
+                  </div>
+                  <div className="upload-tray">
+                    <MiniIcon type="file" />
+                    <strong>Thả JD + CV</strong>
+                  </div>
+                </div>
+
+                <div className="workflow-scan-scene">
+                  <div className="scan-document-preview">
+                    <span className="scan-beam" />
+                    <i className="line long" />
+                    <i className="line medium" />
+                    <i className="line short" />
+                    <i className="line long" />
+                    <i className="line medium" />
+                  </div>
+                  <div className="extract-chip skill-python">Python</div>
+                  <div className="extract-chip skill-fastapi">FastAPI</div>
+                  <div className="extract-chip skill-cloud">Cloud</div>
+                </div>
+
+                <div className="workflow-ai-scene">
+                  <div className="ai-node jd-node"><MiniIcon type="file" /><span>Yêu cầu JD</span></div>
+                  <div className="ai-node cv-node"><MiniIcon type="file" /><span>Bằng chứng CV</span></div>
+                  <div className="ai-core"><MiniIcon type="scan" /><strong>AI matching</strong></div>
+                  <div className="ai-score"><MiniIcon type="check" /><b>82/100</b></div>
+                </div>
               </div>
-            </div>
-            <div className="preview-grid">
-              <section>
-                <span>Đã khớp</span>
-                <b>Python, FastAPI, MongoDB, Docker</b>
-              </section>
-              <section>
-                <span>Cần xác minh</span>
-                <b>Kubernetes, system design, ownership</b>
-              </section>
-            </div>
-            <div className="preview-bars">
-              {[["Yêu cầu JD", 88], ["Ngữ nghĩa", 79], ["AI ranking", 84], ["Độ tin cậy", 76]].map(([label, value]) => (
-                <div key={label}><span>{label}</span><i style={{ width: `${value}%` }} /><b>{value}</b></div>
-              ))}
+
+              <div className="preview-final">
+                <div className="preview-score">
+                  <div className="preview-ring"><strong>82</strong><span>/100</span></div>
+                  <div>
+                    <p>Phù hợp cao</p>
+                    <h2>CV có nền tảng API, database và cloud rõ ràng.</h2>
+                  </div>
+                </div>
+                <div className="preview-grid">
+                  <section>
+                    <span>Đã khớp</span>
+                    <b>Python, FastAPI, MongoDB, Docker</b>
+                  </section>
+                  <section>
+                    <span>Cần xác minh</span>
+                    <b>Kubernetes, system design, ownership</b>
+                  </section>
+                </div>
+                <div className="preview-bars">
+                  {[["Yêu cầu JD", 88], ["Ngữ nghĩa", 79], ["AI ranking", 84], ["Độ tin cậy", 76]].map(([label, value]) => (
+                    <div key={label}><span>{label}</span><i style={{ width: `${value}%` }} /><b>{value}</b></div>
+                  ))}
+                </div>
+              </div>
             </div>
           </aside>
         </section>
@@ -152,13 +200,13 @@ export default function LandingPage() {
 
         <section className="security-strip" data-ai-id="security-strip">
           <div>
-            <p className="landing-kicker">Public upload nhưng có kiểm soát</p>
-            <h2>Guest được dùng thử, hệ thống vẫn có quota nhiều lớp.</h2>
+            <p className="landing-kicker">Dùng thử an toàn</p>
+            <h2>Bạn có thể bắt đầu nhanh, hệ thống vẫn giữ dịch vụ ổn định cho mọi người.</h2>
           </div>
           <ul>
-            <li>Giới hạn theo guest session, IP và subnet.</li>
-            <li>Giới hạn số upload đồng thời cho guest và toàn hệ thống.</li>
-            <li>Turnstile invisible trước khi xử lý file nặng.</li>
+            <li>Mỗi người có một số lượt kiểm tra miễn phí phù hợp trong ngày.</li>
+            <li>Hệ thống tự điều tiết khi nhiều người cùng tải CV lên.</li>
+            <li>File được kiểm tra âm thầm trước khi phân tích để tránh lạm dụng.</li>
           </ul>
         </section>
 
