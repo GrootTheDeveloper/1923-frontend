@@ -43,6 +43,9 @@ export const startMatchJob = (jobId, payload = {}) =>
 export const getMatchJob = (matchJobId) =>
   axiosClient.get(`/match-jobs/${matchJobId}`).then((response) => response.data);
 
+export const listMatchJobs = () =>
+  axiosClient.get("/match-jobs").then((response) => response.data);
+
 export const getJobMatches = (jobId) =>
   axiosClient.get(`/jobs/${jobId}/matches`).then((response) => response.data);
 
